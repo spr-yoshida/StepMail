@@ -21,25 +21,19 @@ namespace StepMail
             members.Initailze();
 
             //メンバーファイル読み込み
-            var profiles = members.Read();
-            //アクティブユーザの絞り込み
-            var activeUser = profiles.Where(c => c.Message.Length > 0);
+            members.Read();
 
-            if (activeUser.Count() == 0)
+            if (members.ActiveUsers.Count() == 0)
             {
                 Console.WriteLine("アクティブユーザーがいません。");
             }
 
             //メール配信
-            foreach (var user in activeUser)
-            {
-                Console.WriteLine("メール配信：" + user.Name + "[" + user.Count.ToString() + "]回目");
-                user.Count++;
-                Console.WriteLine("次回：[" + user.Count.ToString() + "]回目");
-            }
-
+            IMail mail = new Mail(members.ActiveUsers);
+            mail.Send();
+            members.CountUp();
             //メンバーファイルの更新
-            var val = members.Serialize(profiles);
+            var val = members.Serialize(members.Profiles);
             members.Save(val);
 
             //終了

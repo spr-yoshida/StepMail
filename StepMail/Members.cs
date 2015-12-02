@@ -17,6 +17,10 @@ namespace StepMail
             this._message = message;
         }
 
+        public List<Profile> Profiles { get; set; }
+        public IEnumerable<Profile> ActiveUsers { get { return Profiles.Where(c => c.Message.Length > 0); } }
+
+
         public void Initailze()
         {
             var members = new List<Profile>();
@@ -63,7 +67,7 @@ namespace StepMail
             return message;
         }
 
-        public List<Profile> Read()
+        public void Read()
         {
             var fileName = memberFile;
             var currentDir = Directory.GetCurrentDirectory();
@@ -88,9 +92,18 @@ namespace StepMail
                     profiles.Add(profile);
                 }
             }
+            
+            Profiles =  profiles;
 
-            return profiles;
+        }
 
+        public void CountUp()
+        {
+            foreach (var activeUser in ActiveUsers)
+            {
+                activeUser.Count++;
+                Console.WriteLine("次回 " + activeUser.Name + " -> [" + activeUser.Count.ToString() + "]回目");
+            }
         }
 
     }
