@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace StepMail
 {
-    class Profile
+    public class Profile
     {
         public string Name { get; set; }
         public string Mail { get; set; }
-        public string Message { get; set; }
         public int Count { get; set; }
     }
 }

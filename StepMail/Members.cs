@@ -8,20 +8,13 @@ using System.Threading.Tasks;
 
 namespace StepMail
 {
-    class Members
+    public class Members
     {
-        private static readonly string memberFile = "members.json";
-        private readonly Message _message;
-        public Members(Message message)
-        {
-            this._message = message;
-        }
+        public Members() { }
 
-        public List<Profile> Profiles { get; set; }
-        public IEnumerable<Profile> ActiveUsers { get { return Profiles.Where(c => c.Message.Length > 0); } }
+        public IList<Profile> Profiles { get; private set; }
 
-
-        public void Initailze()
+        public static void Initailze(string filePath)
         {
             var members = new List<Profile>();
             members.Add(new Profile() { Name = "User1", Mail = "u1@example.com", Count = 1 });
@@ -30,49 +23,26 @@ namespace StepMail
 
             var jsonStringFromProfiles = DynamicJson.Serialize(members);
 
-            Save(jsonStringFromProfiles);
+            Save(filePath, jsonStringFromProfiles);
         }
 
-        public string Serialize(List<Profile> profiles)
+        public string Serialize()
         {
-            var jsonStringFromProfiles = DynamicJson.Serialize(profiles);
+            var jsonStringFromProfiles = DynamicJson.Serialize(Profiles);
 
             return jsonStringFromProfiles;
         }
 
-        public void Save(string val)
+        public static void Save(string filePath, string val)
         {
-            //ディレクトリ
-            var currentDir = Directory.GetCurrentDirectory();
-
-            //ファイル名
-            var fileName = memberFile;
-            var fullPath = Path.Combine(currentDir, fileName);
-
-            using (StreamWriter sw = new StreamWriter(fullPath, false, Encoding.GetEncoding("shift_jis")))
+            using (StreamWriter sw = new StreamWriter(filePath, false, Encoding.GetEncoding("shift_jis")))
             {
                 sw.Write(val);
             }
         }
 
-        public string GetMessage(int index)
+        public void Read(string filePath)
         {
-            var message = string.Empty;
-            //countで判断してmessage.jsonファイルより読み込んだ値をセットする
-            if (_message.Messages.Count > index)
-            {
-                message = _message.Messages[index];
-            }
-
-            return message;
-        }
-
-        public void Read()
-        {
-            var fileName = memberFile;
-            var currentDir = Directory.GetCurrentDirectory();
-            var filePath = Path.Combine(currentDir, fileName);
-
             var profiles = new List<Profile>();
             using (StreamReader sr = new StreamReader(filePath, Encoding.GetEncoding("shift_jis")))
             {
@@ -87,8 +57,6 @@ namespace StepMail
                     profile.Mail = item.Mail;
                     int count = (int)item.Count;
                     profile.Count = count;
-                    int index = count - 1;
-                    profile.Message = GetMessage(index);
                     profiles.Add(profile);
                 }
             }
@@ -97,12 +65,17 @@ namespace StepMail
 
         }
 
+        public IList<Profile> GetActiveUsers(int count)
+        {
+            return this.Profiles.Where(c => c.Count <= count).ToList();
+        }
+
         public void CountUp()
         {
-            foreach (var activeUser in ActiveUsers)
+            foreach (var profile in Profiles)
             {
-                activeUser.Count++;
-                Console.WriteLine("次回 " + activeUser.Name + " -> [" + activeUser.Count.ToString() + "]回目");
+                profile.Count++;
+                Console.WriteLine("次回 " + profile.Name + " -> [" + profile.Count.ToString() + "]回目");
             }
         }
 
